@@ -6,14 +6,26 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.persistence.*;
+
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+@Entity
+@Table(name="users")
 public class User implements UserDetails {
 	private static final long serialVersionUID = 1L;
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="id")
 	private long id;
+	@Column(name="login")
 	private String login;
+	@Column(name="email")
 	private String email;
+	@Column(name="password")
 	private String password;
+	@Enumerated(EnumType.STRING)
+	@Column(name="role")
 	private Role role;
 	
 	public User() {}
