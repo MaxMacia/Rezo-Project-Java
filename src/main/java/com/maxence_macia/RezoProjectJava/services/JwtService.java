@@ -1,7 +1,10 @@
 package com.maxence_macia.RezoProjectJava.services;
 
 import java.security.Key;
+import java.util.Date;
 import java.util.function.Function;
+
+import org.springframework.security.core.userdetails.UserDetails;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -35,5 +38,19 @@ public class JwtService {
 		byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY );
 		
 		return Keys.hmacShaKeyFor(keyBytes);
+	}
+
+	public boolean isTokenValid(String token, UserDetails user) {
+		final String username = this.extractUsername(token);
+		
+		return (username.equals(user.getUsername()) && !isTokenExpired(token));
+	}
+
+	private boolean isTokenExpired(String token) {
+		return this.extractExpirationDate(token).before(new Date());
+	}
+
+	private Date extractExpirationDate(String token) {
+		return this.extractClaim(token, Claims::getExpiration);
 	}
 }
