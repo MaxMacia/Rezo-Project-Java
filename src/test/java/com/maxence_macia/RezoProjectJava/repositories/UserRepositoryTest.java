@@ -1,0 +1,68 @@
+package com.maxence_macia.RezoProjectJava.repositories;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.Rollback;
+
+import com.maxence_macia.RezoProjectJava.entities.*;
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace=AutoConfigureTestDatabase.Replace.NONE)
+@Rollback(false)
+@TestInstance(Lifecycle.PER_CLASS)
+public class UserRepositoryTest {
+	@Autowired
+	private UserRepository repository;
+	private static User usr;
+
+	@BeforeAll
+	public void initTest() {
+		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
+		User savedUser = this.repository.save(user);
+		usr = savedUser;
+	}
+	
+	@Test
+	public void testSaveUser() {
+		this.repository.delete(usr);
+		usr = null;
+		
+		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
+		User savedUser = this.repository.save(user);
+		usr = savedUser;
+		assertThat(savedUser).isNotNull();
+	}
+	
+	@Test
+	public void testFindUserByLogin() {
+		User user = this.repository.findByLogin("user1").orElse(null);
+		assertThat(user).isNotNull();
+		assertThat(user.getLogin()).isEqualTo(usr.getLogin());
+	}
+	
+
+	@AfterAll
+	public void finishTest() {
+		this.repository.delete(usr);
+		usr = null;
+		
+		User user = repository.findByLogin("user1").orElse(null);
+		assertThat(user).isNull();
+		
+	}
+
+	public User getUsr() {
+		return usr;
+	}
+	public void setUsr(User usrArg) {
+		usr = usrArg;
+	}
+}
