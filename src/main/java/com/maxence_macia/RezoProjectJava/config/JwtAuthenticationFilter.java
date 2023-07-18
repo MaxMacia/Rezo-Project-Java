@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.maxence_macia.RezoProjectJava.services.JwtService;
@@ -16,6 +19,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtService jwtService;
+	@Autowired
+	private UserDetailsService userDetailsService;
 
 	@Override
 	protected void doFilterInternal(
@@ -35,6 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		
 		jwt = authHeader.substring(7);
 		userLogin = this.jwtService.extractUsername(jwt);
+		
+		if (userLogin != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+			UserDetails user = this.userDetailsService.loadUserByUsername(userLogin);
+		}
+		filterChain.doFilter(request, response);
 	}
 
 }
