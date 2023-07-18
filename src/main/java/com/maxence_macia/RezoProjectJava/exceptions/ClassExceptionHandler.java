@@ -23,4 +23,19 @@ public class ClassExceptionHandler {
 		
 		return entity;
 	}
+	
+	@ExceptionHandler
+	public ResponseEntity<ExceptionResponse> handleException(UserAlreadyExistException exception) {
+		var response = new ExceptionResponse(
+				HttpStatus.CONFLICT.value(),
+				exception.getMessage(),
+				System.currentTimeMillis()
+				);
+		var entity = new ResponseEntity<ExceptionResponse>(
+				response,
+				HttpStatus.CONFLICT
+				);
+		
+		return entity;
+	}
 }
