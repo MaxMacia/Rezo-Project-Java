@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.maxence_macia.RezoProjectJava.auth.AuthenticationRequest;
 import com.maxence_macia.RezoProjectJava.auth.AuthenticationResponse;
@@ -13,6 +14,7 @@ import com.maxence_macia.RezoProjectJava.entities.User;
 import com.maxence_macia.RezoProjectJava.exceptions.UserAlreadyExistException;
 import com.maxence_macia.RezoProjectJava.repositories.UserRepository;
 
+@Service
 public class AuthenticationService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
