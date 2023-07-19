@@ -1,20 +1,44 @@
 package com.maxence_macia.RezoProjectJava.services;
 
 import java.security.Key;
-import java.util.Date;
+import java.util.*;
+
 import java.util.function.Function;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 public class JwtService {
 
 	private final String SECRET_KEY = "4eacd42331195f498eda8ea1c6275a4fcd2cb8e993195290e3b9366c71aff16e";
-
+	private final long EXPIRATION = 86400000;
+	
+	public String generateToken(UserDetails user) {
+		return this.generateToken(new HashMap<>(), user, this.EXPIRATION );
+	}
+	
+	public String generateToken(
+			Map<String, Object> extraClaims,
+			UserDetails user,
+			long expiration
+			) {
+		
+		return Jwts
+				.builder()
+				.setClaims(extraClaims)
+				.setSubject(user.getUsername())
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + expiration))
+				.signWith(this.getSigningKey(), SignatureAlgorithm.HS256)
+				.compact();
+	}
+	
 	public String extractUsername(String token) {
 		return this.extractClaim(token, Claims::getSubject);
 	}

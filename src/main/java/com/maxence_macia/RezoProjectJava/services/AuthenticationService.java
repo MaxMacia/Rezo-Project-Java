@@ -14,6 +14,8 @@ public class AuthenticationService {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private UserRepository repository;
+	@Autowired
+	private JwtService jwtService;
 
 	public AuthenticationResponse register(RegisterRequest request) {
 		var user = new User();
@@ -26,6 +28,7 @@ public class AuthenticationService {
 		if (userInDB != null) throw new UserAlreadyExistException("L'utilisateur existe déjà");
 		
 		var savedUser = this.repository.save(user);
+		var jwtToken = this.jwtService.generateToken(user);
 		
 		return null;
 	}
