@@ -1,6 +1,7 @@
 package com.maxence_macia.RezoProjectJava.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.maxence_macia.RezoProjectJava.auth.AuthenticationResponse;
@@ -27,10 +28,14 @@ public class AuthenticationService {
 		var userInDB = this.repository.findByLogin(user.getLogin()).orElse(null);
 		if (userInDB != null) throw new UserAlreadyExistException("L'utilisateur existe déjà");
 		
-		var savedUser = this.repository.save(user);
+		this.repository.save(user);
 		var jwtToken = this.jwtService.generateToken(user);
+		var response = new AuthenticationResponse();
+		response.setStatus(HttpStatus.CREATED.value());
+		response.setToken(jwtToken);
+		response.setTimeStamp(System.currentTimeMillis());
 		
-		return null;
+		return response;
 	}
 
 }

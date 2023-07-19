@@ -1,6 +1,7 @@
 package com.maxence_macia.RezoProjectJava.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +20,12 @@ public class AuthenticationController {
 	@PostMapping("/register")
 	public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
 		var response = this.service.register(request);
+		var entity = new ResponseEntity<AuthenticationResponse>(
+				response,
+				HttpStatus.CREATED
+				);
 		
-		return null;
+		return entity;
 	}
 	
 	@PostMapping("/authenticate")
