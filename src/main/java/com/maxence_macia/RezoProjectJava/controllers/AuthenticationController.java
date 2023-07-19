@@ -30,6 +30,12 @@ public class AuthenticationController {
 	
 	@PostMapping("/authenticate")
 	public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-		return null;
+		var response = this.service.authenticate(request);
+		var entity = new ResponseEntity<AuthenticationResponse>(
+				response,
+				HttpStatus.OK
+				);
+		
+		return entity;
 	}
 }
