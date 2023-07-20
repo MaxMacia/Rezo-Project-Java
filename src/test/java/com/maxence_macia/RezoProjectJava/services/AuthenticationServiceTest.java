@@ -3,7 +3,6 @@ package com.maxence_macia.RezoProjectJava.services;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -16,6 +15,7 @@ import com.maxence_macia.RezoProjectJava.auth.AuthenticationResponse;
 import com.maxence_macia.RezoProjectJava.auth.RegisterRequest;
 import com.maxence_macia.RezoProjectJava.entities.Role;
 import com.maxence_macia.RezoProjectJava.entities.User;
+import com.maxence_macia.RezoProjectJava.repositories.TokenRepository;
 import com.maxence_macia.RezoProjectJava.repositories.UserRepository;
 
 
@@ -23,68 +23,77 @@ import com.maxence_macia.RezoProjectJava.repositories.UserRepository;
 @TestInstance(Lifecycle.PER_CLASS)
 public class AuthenticationServiceTest {
 	@Autowired
-	private UserRepository repository;
+	private UserRepository userRepository;
+	@Autowired
+	private TokenRepository tokenRepository;
 	@Autowired
 	private JwtService jwtService;
 	@Autowired
 	private AuthenticationService authenticationService;
 	private User usr;
 	private String token;
-	private AuthenticationResponse createdResponse;
-	private AuthenticationResponse okResponse;
-
-
-	@BeforeAll
-	public void initTest() {
+	private AuthenticationResponse response;
+	
+	@Test
+	public void registerTest() {
 		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
-		this.usr = repository.save(user);
+		RegisterRequest request = new RegisterRequest();
+		request.setLogin(user.getLogin());
+		request.setEmail(user.getEmail());
+		request.setPassword(user.getPassword());
+		request.setRole(user.getRole());
+		
+		var response = this.authenticationService.register(request);
+		
+		this.usr = this.userRepository.findByLogin(user.getLogin()).orElse(null);
 		this.token = this.jwtService.generateToken(usr);
-		this.createdResponse = new AuthenticationResponse(
+		this.response = new AuthenticationResponse(
 				HttpStatus.CREATED.value(),
 				token,
 				System.currentTimeMillis()
 				);
-		this.okResponse = new AuthenticationResponse(
-				HttpStatus.OK.value(),
-				token,
-				System.currentTimeMillis()
-				);
-	}
 	
-	@Test
-	public void registerTest() {
-		this.repository.delete(this.usr);
-		RegisterRequest request = new RegisterRequest("user1", "user1@mail.com", "1234", Role.USER);
-		var response = this.authenticationService.register(request);
+		assertThat(response.getStatus()).isEqualTo(this.response.getStatus());
+		assertThat(response.getToken()).isEqualTo(this.response.getToken());
 		
-		assertThat(response.getStatus()).isEqualTo(createdResponse.getStatus());
-		assertThat(response.getToken()).isEqualTo(createdResponse.getToken());
-		
-		this.usr = repository.findByLogin(request.getLogin()).orElse(null);
+		assertThat(this.usr.getTokens()).isNotEmpty();
 	}
 	
 	@Test
 	public void authenticateTest() {
+		this.response = new AuthenticationResponse(
+				HttpStatus.OK.value(),
+				this.token,
+				System.currentTimeMillis()
+				);
+		
 		AuthenticationRequest request = new AuthenticationRequest("user1", "1234");
 		var response = this.authenticationService.authenticate(request);
 		
-		assertThat(response.getStatus()).isEqualTo(okResponse.getStatus());
-		assertThat(response.getToken()).isEqualTo(okResponse.getToken());
+		assertThat(response.getStatus()).isEqualTo(this.response.getStatus());
+		assertThat(response.getToken()).isEqualTo(this.response.getToken());
 		
-		usr = repository.findByLogin(request.getLogin()).orElse(null);
+		assertThat(this.tokenRepository.findAll().size()).isGreaterThan(1);
 	}
 	
 	
 	
 	@AfterAll
 	public void finishTest() {
-		this.repository.delete(usr);
+		
+		var tokens = this.tokenRepository.findAll();
+		tokens.forEach(
+				t -> t.setUser(null)
+				);
+		this.tokenRepository.saveAll(tokens);
+		this.tokenRepository.deleteAll();
+		this.usr.setTokens(null);
+		this.userRepository.delete(usr);
 		this.usr = null;
 		this.token = null;
-		this.createdResponse = null;
-		this.okResponse = null;
+		this.response = null;
 		
-		User user = repository.findByLogin("user1").orElse(null);
+		User user = this.userRepository.findByLogin("user1").orElse(null);
 		assertThat(user).isNull();
 		
 	}
@@ -102,16 +111,17 @@ public class AuthenticationServiceTest {
 	public void setToken(String token) {
 		this.token = token;
 	}
-	public AuthenticationResponse getCreatedResponse() {
-		return this.createdResponse;
+	public AuthenticationResponse getResponse() {
+		return this.response;
 	}
-	public void setCreatedResponse(AuthenticationResponse createdResponse) {
-		this.createdResponse = createdResponse;
+	public void setResponse(AuthenticationResponse response) {
+		this.response = response;
 	}
-	public AuthenticationResponse getOkResponse() {
-		return this.okResponse;
+	public UserRepository getUserRepository() {
+		return userRepository;
 	}
-	public void setOkResponse(AuthenticationResponse okResponse) {
-		this.okResponse = okResponse;
+
+	public void setUserRepository(UserRepository userRepository) {
+		this.userRepository = userRepository;
 	}
 }
