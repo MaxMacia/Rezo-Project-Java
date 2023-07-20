@@ -1,6 +1,9 @@
 package com.maxence_macia.RezoProjectJava.services;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,17 @@ public class LogoutService implements LogoutHandler {
 			storedToken.setExpired(true);
 			storedToken.setRevoked(true);
 			this.tokenRepository.save(storedToken);
+			response.setContentType("application/json");
+			response.setStatus(HttpStatus.OK.value());
+			try {
+				response.getOutputStream().println("{ "
+						+ "\"status\": \"" + HttpStatus.OK.value() + "\","
+						+ "\"message\": \"Succes de la deconnection\"," 
+						+ "\"timeStamp\": \"" + System.currentTimeMillis() 
+						+  "\" }");
+			} catch (IOException e) {
+				System.out.println(e);
+			}
 		}		
 	}
 }
