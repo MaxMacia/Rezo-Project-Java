@@ -35,6 +35,7 @@ public class Token {
 		this.tokenType = tokenType;
 		this.expired = expired;
 		this.revoked = revoked;
+		this.user = user;
 	}
 	
 	public long getId() {

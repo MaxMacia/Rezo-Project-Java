@@ -28,40 +28,39 @@ public class AuthenticationServiceTest {
 	private JwtService jwtService;
 	@Autowired
 	private AuthenticationService authenticationService;
-	private static User usr;
-	private static String token;
-	private static AuthenticationResponse createdResponse;
-	private static AuthenticationResponse okResponse;
+	private User usr;
+	private String token;
+	private AuthenticationResponse createdResponse;
+	private AuthenticationResponse okResponse;
 
 
 	@BeforeAll
 	public void initTest() {
 		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
-		User savedUser = repository.save(user);
-		usr = savedUser;
-		token = this.jwtService.generateToken(usr);
-		createdResponse = new AuthenticationResponse(
+		this.usr = repository.save(user);
+		this.token = this.jwtService.generateToken(usr);
+		this.createdResponse = new AuthenticationResponse(
 				HttpStatus.CREATED.value(),
 				token,
 				System.currentTimeMillis()
 				);
-		setOkResponse(new AuthenticationResponse(
+		this.okResponse = new AuthenticationResponse(
 				HttpStatus.OK.value(),
 				token,
 				System.currentTimeMillis()
-				));
+				);
 	}
 	
 	@Test
 	public void registerTest() {
-		repository.delete(usr);
+		this.repository.delete(this.usr);
 		RegisterRequest request = new RegisterRequest("user1", "user1@mail.com", "1234", Role.USER);
 		var response = this.authenticationService.register(request);
 		
 		assertThat(response.getStatus()).isEqualTo(createdResponse.getStatus());
 		assertThat(response.getToken()).isEqualTo(createdResponse.getToken());
 		
-		usr = repository.findByLogin(request.getLogin()).orElse(null);
+		this.usr = repository.findByLogin(request.getLogin()).orElse(null);
 	}
 	
 	@Test
@@ -79,11 +78,11 @@ public class AuthenticationServiceTest {
 	
 	@AfterAll
 	public void finishTest() {
-		repository.delete(usr);
-		usr = null;
-		token = null;
-		createdResponse = null;
-		okResponse = null;
+		this.repository.delete(usr);
+		this.usr = null;
+		this.token = null;
+		this.createdResponse = null;
+		this.okResponse = null;
 		
 		User user = repository.findByLogin("user1").orElse(null);
 		assertThat(user).isNull();
@@ -91,28 +90,28 @@ public class AuthenticationServiceTest {
 	}
 
 
-	public static User getUsr() {
-		return usr;
+	public User getUsr() {
+		return this.usr;
 	}
-	public static void setUsr(User usr) {
-		AuthenticationServiceTest.usr = usr;
+	public void setUsr(User usr) {
+		this.usr = usr;
 	}
-	public static String getToken() {
-		return token;
+	public String getToken() {
+		return this.token;
 	}
-	public static void setToken(String token) {
-		AuthenticationServiceTest.token = token;
+	public void setToken(String token) {
+		this.token = token;
 	}
-	public static AuthenticationResponse getCreatedResponse() {
-		return createdResponse;
+	public AuthenticationResponse getCreatedResponse() {
+		return this.createdResponse;
 	}
-	public static void setCreatedResponse(AuthenticationResponse createdResponse) {
-		AuthenticationServiceTest.createdResponse = createdResponse;
+	public void setCreatedResponse(AuthenticationResponse createdResponse) {
+		this.createdResponse = createdResponse;
 	}
-	public static AuthenticationResponse getOkResponse() {
-		return okResponse;
+	public AuthenticationResponse getOkResponse() {
+		return this.okResponse;
 	}
-	public static void setOkResponse(AuthenticationResponse okResponse) {
-		AuthenticationServiceTest.okResponse = okResponse;
+	public void setOkResponse(AuthenticationResponse okResponse) {
+		this.okResponse = okResponse;
 	}
 }

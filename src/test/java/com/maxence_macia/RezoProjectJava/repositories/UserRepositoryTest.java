@@ -21,24 +21,12 @@ import com.maxence_macia.RezoProjectJava.entities.*;
 public class UserRepositoryTest {
 	@Autowired
 	private UserRepository repository;
-	private static User usr;
+	private User usr;
 
 	@BeforeAll
 	public void initTest() {
 		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
-		User savedUser = this.repository.save(user);
-		usr = savedUser;
-	}
-	
-	@Test
-	public void testSaveUser() {
-		this.repository.delete(usr);
-		usr = null;
-		
-		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
-		User savedUser = this.repository.save(user);
-		usr = savedUser;
-		assertThat(savedUser).isNotNull();
+		this.usr = this.repository.save(user);
 	}
 	
 	@Test
@@ -60,9 +48,9 @@ public class UserRepositoryTest {
 	}
 
 	public User getUsr() {
-		return usr;
+		return this.usr;
 	}
-	public void setUsr(User usrArg) {
-		usr = usrArg;
+	public void setUsr(User usr) {
+		this.usr = usr;
 	}
 }

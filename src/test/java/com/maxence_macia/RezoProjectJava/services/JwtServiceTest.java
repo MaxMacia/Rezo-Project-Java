@@ -17,40 +17,40 @@ import com.maxence_macia.RezoProjectJava.entities.User;
 public class JwtServiceTest {
 	@Autowired
 	private JwtService jwtService;
-	private static User user;
-	private static String jwtToken;
+	private User user;
+	private String jwtToken;
 
 	@BeforeAll
 	public void initTest() {
-		user = new User("user1", "user1@mail.com", "1234", Role.USER);
-		jwtToken = this.jwtService.generateToken(user);
+		this.user = new User("user1", "user1@mail.com", "1234", Role.USER);
+		this.jwtToken = this.jwtService.generateToken(user);
 	}
 	
 	@Test
 	public void generateTokenTest() {
-		var token = this.jwtService.generateToken(user);
+		var token = this.jwtService.generateToken(this.user);
 		
-		assertThat(token).isEqualTo(jwtToken);
+		assertThat(token).isEqualTo(this.jwtToken);
 	}
 	
 	@Test
 	public void extractNameTest() {
-		String username = this.jwtService.extractUsername(jwtToken);
+		String username = this.jwtService.extractUsername(this.jwtToken);
 		
 		assertThat(username).isEqualTo(user.getLogin());
 	}
 	
 	@Test
 	public void isTokenValidTest() {
-		boolean bool = this.jwtService.isTokenValid(jwtToken, user);
+		boolean bool = this.jwtService.isTokenValid(this.jwtToken, this.user);
 		
 		assertThat(bool).isTrue();
 	}
 
-	public static String getJwtToken() {
-		return jwtToken;
+	public String getJwtToken() {
+		return this.jwtToken;
 	}
-	public static void setJwtToken(String jwtToken) {
-		JwtServiceTest.jwtToken = jwtToken;
+	public void setJwtToken(String jwtToken) {
+		this.jwtToken = jwtToken;
 	}
 }
