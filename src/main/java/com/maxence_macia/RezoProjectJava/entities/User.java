@@ -27,6 +27,8 @@ public class User implements UserDetails {
 	@Enumerated(EnumType.STRING)
 	@Column(name="role")
 	private Role role;
+	@OneToMany(mappedBy="user")
+	private List<Token> tokens;
 	
 	public User() {}
 	public User(
@@ -96,5 +98,11 @@ public class User implements UserDetails {
 	}
 	public void setRole(Role role) {
 		this.role = role;
+	}
+	public List<Token> getTokens() {
+		return tokens;
+	}
+	public void setTokens(List<Token> tokens) {
+		this.tokens = tokens;
 	}
 }
