@@ -9,7 +9,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
@@ -25,6 +27,10 @@ public class SecurityConfig {
 	private JwtAuthenticationFilter jwtAuthenticationFilter;
 	@Autowired
 	private LogoutHandler logoutHandler;
+	@Autowired
+	private AuthenticationEntryPoint authenticationEntryPoint;
+	@Autowired
+	private AccessDeniedHandler accessDeniedHandler;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,6 +54,11 @@ public class SecurityConfig {
 						.logoutSuccessHandler(
 								(request, response, authentification) -> SecurityContextHolder.clearContext()
 								)
+					)
+			.exceptionHandling(
+					exceptionHandling -> exceptionHandling
+						.authenticationEntryPoint(this.authenticationEntryPoint)
+						.accessDeniedHandler(this.accessDeniedHandler)
 					);
 		
 		return http.build();
