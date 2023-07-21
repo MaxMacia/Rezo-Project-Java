@@ -31,7 +31,8 @@ public class AuthenticationServiceTest {
 	@Autowired
 	private AuthenticationService authenticationService;
 	private User usr;
-	private String token;
+	private String accessToken;
+	private String refreshToken;
 	private AuthenticationResponse response;
 	
 	@Test
@@ -46,15 +47,18 @@ public class AuthenticationServiceTest {
 		var response = this.authenticationService.register(request);
 		
 		this.usr = this.userRepository.findByLogin(user.getLogin()).orElse(null);
-		this.token = this.jwtService.generateToken(usr);
+		this.accessToken = this.jwtService.generateAccessToken(usr);
+		this.refreshToken = this.jwtService.generateRefreshToken(usr);
 		this.response = new AuthenticationResponse(
 				HttpStatus.CREATED.value(),
-				token,
+				this.accessToken,
+				this.refreshToken,
 				System.currentTimeMillis()
 				);
 	
 		assertThat(response.getStatus()).isEqualTo(this.response.getStatus());
-		assertThat(response.getToken()).isEqualTo(this.response.getToken());
+		assertThat(response.getAccesstoken()).isEqualTo(this.response.getAccesstoken());
+		assertThat(response.getRefreshtoken()).isEqualTo(this.response.getRefreshtoken());
 		
 		assertThat(this.usr.getTokens()).isNotEmpty();
 	}
@@ -63,7 +67,8 @@ public class AuthenticationServiceTest {
 	public void authenticateTest() {
 		this.response = new AuthenticationResponse(
 				HttpStatus.OK.value(),
-				this.token,
+				this.accessToken,
+				this.refreshToken,
 				System.currentTimeMillis()
 				);
 		
@@ -71,7 +76,8 @@ public class AuthenticationServiceTest {
 		var response = this.authenticationService.authenticate(request);
 		
 		assertThat(response.getStatus()).isEqualTo(this.response.getStatus());
-		assertThat(response.getToken()).isEqualTo(this.response.getToken());
+		assertThat(response.getAccesstoken()).isEqualTo(this.response.getAccesstoken());
+		assertThat(response.getRefreshtoken()).isEqualTo(this.response.getRefreshtoken());
 		
 		assertThat(this.tokenRepository.findAllTokenByUser(this.usr.getId()).size()).isGreaterThan(1);
 	}
@@ -90,7 +96,8 @@ public class AuthenticationServiceTest {
 		this.usr.setTokens(null);
 		this.userRepository.delete(usr);
 		this.usr = null;
-		this.token = null;
+		this.accessToken = null;
+		this.refreshToken = null;
 		this.response = null;
 		
 		User user = this.userRepository.findByLogin("user1").orElse(null);
@@ -105,12 +112,6 @@ public class AuthenticationServiceTest {
 	public void setUsr(User usr) {
 		this.usr = usr;
 	}
-	public String getToken() {
-		return this.token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
 	public AuthenticationResponse getResponse() {
 		return this.response;
 	}
@@ -123,5 +124,21 @@ public class AuthenticationServiceTest {
 
 	public void setUserRepository(UserRepository userRepository) {
 		this.userRepository = userRepository;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
 	}
 }

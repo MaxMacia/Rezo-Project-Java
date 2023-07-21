@@ -34,8 +34,8 @@ public class TokenRepositoryTest {
 	public void initTest() {
 		User user = new User("user1", "user1@mail.com", "1234", Role.USER);
 		this.usr = this.userRepository.save(user);
-		this.jwtToken = this.jwtService.generateToken(usr);
-		Token token = new Token(jwtToken, TokenType.Bearer, false, false, this.usr);
+		this.jwtToken = this.jwtService.generateAccessToken(usr);
+		Token token = new Token(jwtToken, TokenType.BEARER, false, false, this.usr);
 		this.tokn = this.tokenRepository.save(token);
 	}
 	
