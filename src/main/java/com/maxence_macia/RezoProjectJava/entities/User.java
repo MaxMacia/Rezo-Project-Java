@@ -8,8 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 @Entity
 @Table(name="users")
 public class User implements UserDetails {
@@ -46,7 +44,7 @@ public class User implements UserDetails {
 	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority(this.role.name()));
+		return this.role.getAuthorities();
 	}
 	@Override
 	public String getUsername() {

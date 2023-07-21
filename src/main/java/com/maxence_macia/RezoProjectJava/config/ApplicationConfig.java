@@ -98,7 +98,7 @@ public class ApplicationConfig {
 				response.setContentType("application/json");
 				response.setStatus(HttpStatus.FORBIDDEN.value());
 				response.getOutputStream().println("{ "
-						+ "\"status\": \"" + HttpStatus.UNAUTHORIZED.value() + "\","
+						+ "\"status\": \"" + HttpStatus.FORBIDDEN.value() + "\","
 						+ "\"message\": \"Accès non authorisé\"," 
 						+ "\"timeStamp\": \"" + System.currentTimeMillis() 
 						+  "\" }");

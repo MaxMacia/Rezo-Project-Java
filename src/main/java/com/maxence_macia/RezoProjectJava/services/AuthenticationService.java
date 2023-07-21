@@ -39,7 +39,6 @@ public class AuthenticationService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
-
 	public AuthenticationResponse register(RegisterRequest request) {
 		var user = new User();
 		user.setLogin(request.getLogin());
@@ -153,5 +152,36 @@ public class AuthenticationService {
 		token.setExpired(false);
 		token.setRevoked(false);
 		this.tokenRepository.save(token);
+	}
+	
+	public PasswordEncoder getPasswordEncoder() {
+		return passwordEncoder;
+	}
+	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+		this.passwordEncoder = passwordEncoder;
+	}
+	public UserRepository getUserRepository() {
+		return userRepository;
+	}
+	public void setUserRepository(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+	public TokenRepository getTokenRepository() {
+		return tokenRepository;
+	}
+	public void setTokenRepository(TokenRepository tokenRepository) {
+		this.tokenRepository = tokenRepository;
+	}
+	public JwtService getJwtService() {
+		return jwtService;
+	}
+	public void setJwtService(JwtService jwtService) {
+		this.jwtService = jwtService;
+	}
+	public AuthenticationManager getAuthenticationManager() {
+		return authenticationManager;
+	}
+	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
 	}
 }
