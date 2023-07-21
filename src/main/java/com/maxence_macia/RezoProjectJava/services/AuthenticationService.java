@@ -85,39 +85,6 @@ public class AuthenticationService {
 		return response;
 	}
 	
-	private void revokeAllUserTokens(User user) {
-		var validUserTokens = this.tokenRepository.findAllValidTokenByUser(user.getId());
-		if (validUserTokens.isEmpty()) {
-			return;
-		}
-		validUserTokens.forEach(
-				t -> {
-					t.setExpired(true);
-					t.setRevoked(true);
-				}
-				);
-		this.tokenRepository.saveAll(validUserTokens);
-	}
-
-	private void saveUserTokens(
-			User user,
-			String accessToken,
-			String refreshToken
-			) {
-		this.saveUserToken(user, accessToken, TokenType.BEARER);
-		this.saveUserToken(user, refreshToken, TokenType.REFRESH);
-	}
-	
-	private void saveUserToken(User user, String jwtToken, TokenType type) {
-		Token token = new Token();
-		token.setUser(user);
-		token.setToken(jwtToken);
-		token.setTokenType(type);
-		token.setExpired(false);
-		token.setRevoked(false);
-		this.tokenRepository.save(token);
-	}
-	
 	public void refreshToken(
 			HttpServletRequest request,
 			HttpServletResponse response
@@ -153,5 +120,38 @@ public class AuthenticationService {
 			}
 			
 		}
+	}
+	
+	private void revokeAllUserTokens(User user) {
+		var validUserTokens = this.tokenRepository.findAllValidTokenByUser(user.getId());
+		if (validUserTokens.isEmpty()) {
+			return;
+		}
+		validUserTokens.forEach(
+				t -> {
+					t.setExpired(true);
+					t.setRevoked(true);
+				}
+				);
+		this.tokenRepository.saveAll(validUserTokens);
+	}
+
+	private void saveUserTokens(
+			User user,
+			String accessToken,
+			String refreshToken
+			) {
+		this.saveUserToken(user, accessToken, TokenType.BEARER);
+		this.saveUserToken(user, refreshToken, TokenType.REFRESH);
+	}
+	
+	private void saveUserToken(User user, String jwtToken, TokenType type) {
+		Token token = new Token();
+		token.setUser(user);
+		token.setToken(jwtToken);
+		token.setTokenType(type);
+		token.setExpired(false);
+		token.setRevoked(false);
+		this.tokenRepository.save(token);
 	}
 }

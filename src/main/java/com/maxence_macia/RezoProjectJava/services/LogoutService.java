@@ -5,10 +5,13 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+import com.maxence_macia.RezoProjectJava.entities.User;
 import com.maxence_macia.RezoProjectJava.repositories.TokenRepository;
+import com.maxence_macia.RezoProjectJava.repositories.UserRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +20,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LogoutService implements LogoutHandler {
 	@Autowired
 	private TokenRepository tokenRepository;
+	@Autowired
+	private JwtService jwtService;
+	@Autowired
+	private UserRepository userRepository;
 
 	@Override
 	public void logout(
@@ -26,18 +33,22 @@ public class LogoutService implements LogoutHandler {
 			) {
 		final String authHeader = request.getHeader("Authorization");
 		final String jwt;
+		final String userLogin;
 		
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			return;
 		}
 		
 		jwt = authHeader.substring(7);
-		var storedToken = this.tokenRepository.findByToken(jwt).orElse(null);
+		userLogin = this.jwtService.extractUsername(jwt);
 		
-		if (storedToken != null) {
-			storedToken.setExpired(true);
-			storedToken.setRevoked(true);
-			this.tokenRepository.save(storedToken);
+		if (userLogin != null) {
+			User user = this.userRepository.findByLogin(userLogin)
+					.orElseThrow(() -> new UsernameNotFoundException("Utilisateur inconnu"));
+			
+			var tokenList = this.tokenRepository.findAllTokenByUser(user.getId());
+			this.tokenRepository.deleteAll(tokenList);
+			
 			response.setContentType("application/json");
 			response.setStatus(HttpStatus.OK.value());
 			try {
@@ -49,6 +60,7 @@ public class LogoutService implements LogoutHandler {
 			} catch (IOException e) {
 				System.out.println(e);
 			}
-		}		
+		}
+		
 	}
 }

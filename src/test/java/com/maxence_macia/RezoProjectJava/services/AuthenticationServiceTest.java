@@ -82,8 +82,6 @@ public class AuthenticationServiceTest {
 		assertThat(this.tokenRepository.findAllTokenByUser(this.usr.getId()).size()).isGreaterThan(1);
 	}
 	
-	
-	
 	@AfterAll
 	public void finishTest() {
 		
