@@ -16,5 +16,11 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
 			""")
 	public List<Token> findAllValidTokenByUser(@Param("userId") long userId);
 	
+	@Query("""
+			select t from Token t inner join User u on t.user.id = u.id
+			where u.id = :userId
+			""")
+	public List<Token> findAllTokenByUser(@Param("userId") long userId);
+	
 	public Optional<Token> findByToken(String token);
 }

@@ -2,14 +2,16 @@ package com.maxence_macia.RezoProjectJava.auth;
 
 public class AuthenticationResponse {
 	private int status;
-	private String token;
+	private String accesstoken;
+	private String refreshtoken;
 	private long timeStamp;
 	
 	public AuthenticationResponse() {}
-	public AuthenticationResponse(int status, String token, long timeStamp) {
+	public AuthenticationResponse(int status, String accesstoken, String refreshtoken, long timeStamp) {
 		super();
 		this.status = status;
-		this.token = token;
+		this.accesstoken = accesstoken;
+		this.refreshtoken = refreshtoken;
 		this.timeStamp = timeStamp;
 	}
 	
@@ -19,11 +21,17 @@ public class AuthenticationResponse {
 	public void setStatus(int status) {
 		this.status = status;
 	}
-	public String getToken() {
-		return token;
+	public String getAccesstoken() {
+		return accesstoken;
 	}
-	public void setToken(String token) {
-		this.token = token;
+	public void setAccesstoken(String accesstoken) {
+		this.accesstoken = accesstoken;
+	}
+	public String getRefreshtoken() {
+		return refreshtoken;
+	}
+	public void setRefreshtoken(String refreshtoken) {
+		this.refreshtoken = refreshtoken;
 	}
 	public long getTimeStamp() {
 		return timeStamp;

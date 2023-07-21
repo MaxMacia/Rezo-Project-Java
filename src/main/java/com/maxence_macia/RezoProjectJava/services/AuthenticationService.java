@@ -1,12 +1,18 @@
 package com.maxence_macia.RezoProjectJava.services;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.exc.StreamWriteException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxence_macia.RezoProjectJava.auth.AuthenticationRequest;
 import com.maxence_macia.RezoProjectJava.auth.AuthenticationResponse;
 import com.maxence_macia.RezoProjectJava.auth.RegisterRequest;
@@ -16,6 +22,9 @@ import com.maxence_macia.RezoProjectJava.entities.User;
 import com.maxence_macia.RezoProjectJava.exceptions.UserAlreadyExistException;
 import com.maxence_macia.RezoProjectJava.repositories.TokenRepository;
 import com.maxence_macia.RezoProjectJava.repositories.UserRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class AuthenticationService {
@@ -42,11 +51,13 @@ public class AuthenticationService {
 		if (userInDB != null) throw new UserAlreadyExistException("L'utilisateur existe déjà");
 		
 		var savedUser = this.userRepository.save(user);
-		var jwtToken = this.jwtService.generateToken(user);
-		this.saveUserToken(savedUser, jwtToken);
+		var accessToken = this.jwtService.generateAccessToken(user);
+		var refreshToken = this.jwtService.generateRefreshToken(user);
+		this.saveUserTokens(savedUser, accessToken, refreshToken);
 		var response = new AuthenticationResponse();
 		response.setStatus(HttpStatus.CREATED.value());
-		response.setToken(jwtToken);
+		response.setAccesstoken(accessToken);
+		response.setRefreshtoken(refreshToken);
 		response.setTimeStamp(System.currentTimeMillis());
 		
 		return response;
@@ -60,13 +71,15 @@ public class AuthenticationService {
 						)
 				);
 		var user = this.userRepository.findByLogin(request.getLogin())
-				.orElseThrow(() -> new UserAlreadyExistException("L'utilisateur existe déjà"));
-		var jwtToken = this.jwtService.generateToken(user);
+				.orElseThrow(() -> new UsernameNotFoundException("Utilisateur inconnu"));
+		var accessToken = this.jwtService.generateAccessToken(user);
+		var refreshToken = this.jwtService.generateRefreshToken(user);
 		this.revokeAllUserTokens(user);
-		this.saveUserToken(user, jwtToken);
+		this.saveUserTokens(user, accessToken, refreshToken);
 		var response = new AuthenticationResponse();
 		response.setStatus(HttpStatus.OK.value());
-		response.setToken(jwtToken);
+		response.setAccesstoken(accessToken);
+		response.setRefreshtoken(refreshToken);
 		response.setTimeStamp(System.currentTimeMillis());
 		
 		return response;
@@ -86,22 +99,59 @@ public class AuthenticationService {
 		this.tokenRepository.saveAll(validUserTokens);
 	}
 
-	private void saveUserToken(User user, String jwtToken) {
+	private void saveUserTokens(
+			User user,
+			String accessToken,
+			String refreshToken
+			) {
+		this.saveUserToken(user, accessToken, TokenType.BEARER);
+		this.saveUserToken(user, refreshToken, TokenType.REFRESH);
+	}
+	
+	private void saveUserToken(User user, String jwtToken, TokenType type) {
 		Token token = new Token();
 		token.setUser(user);
 		token.setToken(jwtToken);
-		token.setTokenType(TokenType.Bearer);
+		token.setTokenType(type);
 		token.setExpired(false);
 		token.setRevoked(false);
 		this.tokenRepository.save(token);
 	}
-
-	public UserRepository getUserRepository() {
-		return userRepository;
+	
+	public void refreshToken(
+			HttpServletRequest request,
+			HttpServletResponse response
+			) throws StreamWriteException, DatabindException, IOException {
+		final String authHeader = request.getHeader("Authorization");
+		final String refreshToken;
+		final String userLogin;
+		
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return;
+		}
+		
+		refreshToken = authHeader.substring(7);
+		userLogin = this.jwtService.extractUsername(refreshToken);
+		
+		if (userLogin != null) {
+			var user = this.userRepository.findByLogin(userLogin)
+					.orElseThrow(() -> new UsernameNotFoundException("Utilisateur inconnu"));
+			var isTokenValid = this.tokenRepository.findByToken(refreshToken)
+					.map(t -> !t.isExpired() && !t.isRevoked())
+					.orElse(false);
+			
+			if (this.jwtService.isTokenValid(refreshToken, user) && isTokenValid) {
+				var accessToken = this.jwtService.generateAccessToken(user);
+				this.revokeAllUserTokens(user);
+				this.saveUserTokens(user, accessToken, refreshToken);
+				var authResponse = new AuthenticationResponse();
+				authResponse.setStatus(HttpStatus.OK.value());
+				authResponse.setAccesstoken(accessToken);
+				authResponse.setRefreshtoken(refreshToken);
+				authResponse.setTimeStamp(System.currentTimeMillis());
+				new ObjectMapper().writeValue(response.getOutputStream(), authResponse);;
+			}
+			
+		}
 	}
-
-	public void setUserRepository(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
-
 }

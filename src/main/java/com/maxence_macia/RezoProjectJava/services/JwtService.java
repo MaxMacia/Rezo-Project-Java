@@ -18,10 +18,15 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
 	private final String SECRET_KEY = "4eacd42331195f498eda8ea1c6275a4fcd2cb8e993195290e3b9366c71aff16e";
-	private final long EXPIRATION = 86400000;
+	private final long ACCESS_TOKEN_EXPIRATION = 86400000;
+	private final long REFRESH_TOKEN_EXPIRATION = 604800000;
 	
-	public String generateToken(UserDetails user) {
-		return this.generateToken(new HashMap<>(), user, this.EXPIRATION );
+	public String generateAccessToken(UserDetails user) {
+		return this.generateToken(new HashMap<>(), user, this.ACCESS_TOKEN_EXPIRATION);
+	}
+	
+	public String generateRefreshToken(UserDetails user) {
+		return this.generateToken(new HashMap<>(), user, this.REFRESH_TOKEN_EXPIRATION);
 	}
 	
 	public String generateToken(
@@ -77,5 +82,13 @@ public class JwtService {
 
 	private Date extractExpirationDate(String token) {
 		return this.extractClaim(token, Claims::getExpiration);
+	}
+
+	public long getACCESS_TOKEN_EXPIRATION() {
+		return ACCESS_TOKEN_EXPIRATION;
+	}
+
+	public long getREFRESH_TOKEN_EXPIRATION() {
+		return REFRESH_TOKEN_EXPIRATION;
 	}
 }

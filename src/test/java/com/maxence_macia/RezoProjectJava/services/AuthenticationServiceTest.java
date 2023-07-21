@@ -73,7 +73,7 @@ public class AuthenticationServiceTest {
 		assertThat(response.getStatus()).isEqualTo(this.response.getStatus());
 		assertThat(response.getToken()).isEqualTo(this.response.getToken());
 		
-		assertThat(this.tokenRepository.findAll().size()).isGreaterThan(1);
+		assertThat(this.tokenRepository.findAllTokenByUser(this.usr.getId()).size()).isGreaterThan(1);
 	}
 	
 	
@@ -81,7 +81,7 @@ public class AuthenticationServiceTest {
 	@AfterAll
 	public void finishTest() {
 		
-		var tokens = this.tokenRepository.findAll();
+		var tokens = this.tokenRepository.findAllTokenByUser(this.usr.getId());
 		tokens.forEach(
 				t -> t.setUser(null)
 				);
