@@ -2,6 +2,7 @@ package com.maxence_macia.RezoProjectJava.entities;
 
 import java.util.List;
 
+
 import jakarta.persistence.*;
 
 @Entity
@@ -18,8 +19,12 @@ public class Message {
 	private String content;
 	@Column(name="likes")
 	private long likes;
-	@OneToMany(mappedBy="message")
-	@Column(name="users_liked")
+	@ManyToMany
+	@JoinTable(
+			name="users_liked",
+			joinColumns=@JoinColumn(name="messages_id"),
+			inverseJoinColumns=@JoinColumn(name="users_id")
+			)
 	private List<User> usersLiked;
 	
 	public Message() {}

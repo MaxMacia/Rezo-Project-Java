@@ -29,6 +29,13 @@ public class User implements UserDetails {
 	private List<Token> tokens;
 	@OneToMany(mappedBy="user", fetch=FetchType.EAGER)
 	private List<Message> messages;
+	@ManyToMany
+	@JoinTable(
+			name="users_liked",
+			joinColumns=@JoinColumn(name="users_id"),
+			inverseJoinColumns=@JoinColumn(name="messages_id")
+			)
+	private List<Message> messageLiked;
 	
 	public User() {}
 	public User(
@@ -104,5 +111,11 @@ public class User implements UserDetails {
 	}
 	public void setTokens(List<Token> tokens) {
 		this.tokens = tokens;
+	}
+	public List<Message> getMessageLiked() {
+		return messageLiked;
+	}
+	public void setMessageLiked(List<Message> messageLiked) {
+		this.messageLiked = messageLiked;
 	}
 }
