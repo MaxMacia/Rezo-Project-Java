@@ -27,6 +27,8 @@ public class User implements UserDetails {
 	private Role role;
 	@OneToMany(mappedBy="user", fetch=FetchType.EAGER)
 	private List<Token> tokens;
+	@OneToMany(mappedBy="user", fetch=FetchType.EAGER)
+	private List<Message> messages;
 	
 	public User() {}
 	public User(
