@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/collectionSaver
+    username: postgres
+    #set your own postgreSQL password here
+    password: 211089Mn
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+server:
+  shutdown: graceful
+  port: '8080'
